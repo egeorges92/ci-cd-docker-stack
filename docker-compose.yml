@@ -1,0 +1,71 @@
+#docker run --name nginx_proxy -v `pwd`:/etc/nginx/conf.d -p 443:443 -p 80:80 nginx
+version: '3'
+volumes:
+  jenkins-data:
+    driver: "local"
+  nexus-data:
+    driver: "local"
+  nginx-log:
+    driver: "local"
+  sonarqube_conf:
+    driver: "local"
+  sonarqube_data:
+    driver: "local"
+  sonarqube_extensions:
+    driver: "local"
+  sonarqube_bundled-plugins:
+    driver: "local"
+services:
+  nginx: 
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ${pwd}/nginx/conf.d:/etc/nginx/conf.d
+      - ${pwd}/nginx/ssl:/etc/nginx/ssl
+      - ${pwd}/nginx/html:/usr/share/nginx/html
+      - nginx-log:/var/log/nginx
+    depends_on:
+      - jenkins
+      - keycloak
+      - nexus
+      - sonarqube
+    restart: always
+  keycloak:
+    image: jboss/keycloak:4.5.0.Final
+    container_name: keycloak
+    environment:
+      KEYCLOAK_USER: 'admin'
+      KEYCLOAK_PASSWORD: 'password'
+      PROXY_ADDRESS_FORWARDING: 'true'
+      CHE_KEYCLOAK_AUTH__SERVER__URL: 'https://keycloak.example.org/auth/'
+    ports:
+      - 8000:8080
+  jenkins:
+    image: jenkins.nginx.docker:lts
+    build:
+      context: ./jenkins
+      dockerfile: Dockerfile
+    container_name: jenkins
+    volumes:
+      - jenkins-data:/var/jenkins_home
+    restart: always
+  nexus:
+    image: sonatype/nexus3:3.13.0
+    volumes:
+      - "nexus-data:/nexus-data"
+    ports:
+      - "8081:8081"
+  sonarqube:
+    image: sonarqube:7.1
+    volumes:
+      - "nexus-data:/nexus-data"
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube_conf:/opt/sonarqube/conf
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
