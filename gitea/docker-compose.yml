@@ -1,0 +1,52 @@
+#docker run --name nginx_proxy -v `pwd`:/etc/nginx/conf.d -p 443:443 -p 80:80 nginx
+version: '3'
+volumes:
+  gitea-data:
+    driver: "local"
+  postgres-data:
+    driver: "local"
+  postgres:
+    driver: "local"
+services:
+  gitea:
+    image: gitea/gitea:latest
+    container_name: gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - APP_NAME=example.org source repository
+      - RUN_MODE=prod
+      - SSH_DOMANE=gitea.example.org
+      - SSH_PORT=222
+      - DISABLE_SSH=false
+      - ROOT_URL=http://gitea.example.org:3000
+      - DB_TYPE=postgres
+      - DB_HOST=postgres:5432
+      - DB_NAME=gitea
+      - DB_USER=gitea
+      - DB_PASSWD=gitea
+      - DB_SSL_MODE=disable
+      - INSTALL_LOCK=true
+      - DISABLE_REGISTRATION=true
+      - REQUIRE_SIGNIN_VIEW=true
+    volumes:
+      - gitea-data:/data
+      #- '${pwd}/app.ini.template:/etc/templates/app.ini'
+    ports:
+      - '3000:3000'
+      - '222:22'
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:9.6
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=gitea
+      - POSTGRES_PASSWORD=gitea
+      - POSTGRES_DB=gitea
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgresql
+      # This needs explicit mapping due to https://github.com/docker-library/postgres/blob/4e48e3228a30763913ece952c611e5e9b95c8759/Dockerfile.template#L52
+      - postgres-data:/var/lib/postgresql/data

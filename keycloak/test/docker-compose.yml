@@ -1,0 +1,44 @@
+version: '3.1'
+
+services:
+  nginx: 
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ${pwd}/nginx/conf.d:/etc/nginx/conf.d
+      - ${pwd}/nginx/ssl:/etc/nginx/ssl
+      - ${pwd}/nginx/html:/usr/share/nginx/html
+    depends_on:
+      - keycloak
+    restart: always
+  openldap:
+    build: ./openldap
+    image: openldap:latest
+    container_name: openldap
+    hostname: openldap
+  phpldapadmin:
+    image: osixia/phpldapadmin:0.7.1
+    container_name: phpldapadmin
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: "openldap"
+      PHPLDAPADMIN_HTTPS=false:
+    ports:
+      - "8081:80"
+    depends_on:
+      - openldap
+  keycloak:
+    image: jboss/keycloak:4.5.0.Final
+    container_name: keycloak
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: password
+      PROXY_ADDRESS_FORWARDING: 'true'
+      JAVA_OPTS: -server -Xms64m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true-Dkeycloak.import=/var/jboss/keycloak/example.org-realm.json
+    volumes:
+      - ./realms:/var/jboss/keycloak/realms
+    command: ["-b", "0.0.0.0", "-Dkeycloak.import=/var/jboss/keycloak/realms/example.org-realm.json,/var/jboss/keycloak/realms/demo-realm.json"]
+    depends_on:
+      - openldap

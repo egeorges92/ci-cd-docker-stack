@@ -1,0 +1,89 @@
+# Gestion des personnes
+# Entry : ou=people,dc=example,dc=org
+dn: ou=people,dc=example,dc=org
+changetype: add
+objectclass: organizationalUnit
+objectclass: top
+ou: people
+
+# Entry : cn=administrator,ou=people,dc=example,dc=org
+dn: cn=administrator,ou=people,dc=example,dc=org
+changetype: add
+cn: administrator
+displayname: Administrator
+givenname: Administrator
+mail: administrator@example.org
+objectclass: inetOrgPerson
+objectclass: top
+sn: Administrator
+uid: administrator
+userpassword: {MD5}Xr4ilOzQ4PCOq3aQ0qbuaQ==
+
+# Entry : cn=projectManager,ou=people,dc=example,dc=org
+dn: cn=projectManager,ou=people,dc=example,dc=org
+changetype: add
+cn: projectManager
+displayname: ProjectManager
+givenname: ProjectManager
+mail: projectManager@example.org
+objectclass: inetOrgPerson
+objectclass: top
+sn: ProjectManager
+uid: projectManager
+userpassword: {MD5}Xr4ilOzQ4PCOq3aQ0qbuaQ==
+
+# Entry : cn=developer,ou=people,dc=example,dc=org
+dn: cn=developer,ou=people,dc=example,dc=org
+changetype: add
+cn: developer
+displayname: developer
+givenname: developer
+mail: developer@example.org
+objectclass: inetOrgPerson
+objectclass: top
+sn: developer
+uid: developer
+userpassword: {MD5}Xr4ilOzQ4PCOq3aQ0qbuaQ==
+
+# Gestion des groupes
+# Entry : ou=groups,dc=example,dc=org
+dn: ou=groups,dc=example,dc=org
+changetype: add
+objectclass:organizationalunit
+ou: groups
+
+# Entry cn=administrators,ou=groups,dc=example,dc=org
+dn: cn=administrators,ou=groups,dc=example,dc=org
+changetype: add
+objectclass: groupOfUniqueNames
+objectClass: top
+ou: groups
+cn: administrators
+description: Administrateurs
+# add the group members all of which are 
+# assumed to exist under people
+uniqueMember: cn=administrator,ou=people,dc=example,dc=org
+
+# Entry cn=projectManagers,ou=groups,dc=example,dc=org
+dn: cn=projectManagers,ou=groups,dc=example,dc=org
+changetype: add
+objectclass: groupOfUniqueNames
+objectClass: top
+ou: groups
+cn: projectManagers
+description: Chefs de Projets
+# add the group members all of which are 
+# assumed to exist under people
+uniqueMember: cn=projectManager,ou=people,dc=example,dc=org
+
+# Entry cn=developers,ou=groups,dc=example,dc=org
+dn: cn=developers,ou=groups,dc=example,dc=org
+changetype: add
+objectclass: groupOfUniqueNames
+objectClass: top
+ou: groups
+cn: developers
+description: Développeurs
+# add the group members all of which are 
+# assumed to exist under people
+uniqueMember: cn=developer,ou=people,dc=example,dc=org

@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+  CREATE ROLE sonar WITH LOGIN PASSWORD 'sonar' VALID UNTIL 'infinity';
+  CREATE DATABASE sonar WITH ENCODING='UTF8' OWNER=sonar CONNECTION LIMIT=-1; 
+EOSQL
